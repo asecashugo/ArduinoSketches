@@ -22,6 +22,20 @@ double consigna, hist;
 float t, h;
 
 
+#include <Process.h>
+#include "EmonLib.h"
+
+EnergyMonitor cons;
+EnergyMonitor gen;
+
+// set up net client info:
+const unsigned long postingInterval = 1000;  //delay between updates to emoncms.com
+unsigned long lastRequest = 0;      // when you last made a request
+String dataString = "";
+
+
+
+
 void sendUptime()
 {
   Serial.write("empezando funcion");
@@ -81,6 +95,9 @@ BLYNK_WRITE(V2)
 
 void setup()
 {
+
+  Bridge.begin();
+  
   Serial.begin(9600);
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW);
@@ -91,6 +108,10 @@ void setup()
   timer.setInterval(1000, sendUptime);//1000=1s
   hist = 2;
   salida_man = 0;
+
+  updateData();
+  sendDataLocal();
+  lastRequest = millis();
 
 }
 
@@ -127,4 +148,65 @@ void loop() {
     Blynk.virtualWrite(6, 0); // virtual pin
   }
 
+
+  long now = millis();
+
+
+
+
+  // if the sending interval has passed since your
+  // last connection, then connect again and send data:
+  if (now - lastRequest >= postingInterval) {
+    updateData();
+    sendDataLocal();
+    lastRequest = now;
+
 }
+}
+
+
+void updateData() {
+  // convert the readings to a String to send it:
+  double temp_int = t;
+  dataString = "Temp_int:";
+  dataString += temp_int;
+}
+
+
+
+void sendDataLocal() {
+  // form the string for the API header parameter:
+  String apiString = "e22ff0cae49b72a2901811989be7eba0";
+  // apiString += APIKEY;
+
+  // form the string for the URL parameter:
+  String url = "http://rpihugo.ddns.net/emoncms/input/post?";
+  url += "json={";
+  url += dataString;
+  url += "}&";
+  url += "apikey=";
+  url += apiString;
+  // Send the HTTP PUT request
+
+  // Is better to declare the Process here, so when the
+  // sendData function finishes the resources are immediately
+  // released. Declaring it global works too, BTW.
+  Process emoncms;
+  Console.print("\n\nSending data local CURL... ");
+  Console.println(url);
+  emoncms.begin("curl");
+  emoncms.addParameter("-g");
+  emoncms.addParameter(url);
+  emoncms.run();
+
+
+
+  // If there's incoming data from the net connection,
+  // send it out the Console:
+  while (emoncms.available() > 0) {
+    char c = emoncms.read();
+    Console.write(c);
+  }
+
+}
+
