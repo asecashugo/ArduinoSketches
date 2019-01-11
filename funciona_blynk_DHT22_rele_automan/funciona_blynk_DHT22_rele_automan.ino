@@ -85,7 +85,7 @@ void setup()
   Blynk.begin(auth);
   dht.begin(); 
   timer.setInterval(1000, sendUptime);//1000=1s
-  hist=2;
+  hist=1;
   salida_man=0;
 
 }
