@@ -1,17 +1,17 @@
 /*
-  Emoncms sensor client with Strings 
- 
- This sketch connects an analog sensor to Emoncms,
- using a ms14 with Yún + Lenonard. 
- 
- created 15 March 2010
- updated 27 May 2013
- by Tom Igoe
-   
- updated 6, Oct, 2013 to support Emoncms
- by Edwin Chen
-   
- */
+  Emoncms sensor client with Strings
+
+  This sketch connects an analog sensor to Emoncms,
+  using a ms14 with Yún + Lenonard.
+
+  created 15 March 2010
+  updated 27 May 2013
+  by Tom Igoe
+
+  updated 6, Oct, 2013 to support Emoncms
+  by Edwin Chen
+
+*/
 
 
 // include all Libraries needed:
@@ -31,19 +31,19 @@ void setup() {
   // start serial port:
   Bridge.begin();
   Console.begin();
- 
+
 
   //while(!Console);    // wait for Network Console to open
   Console.println("Emoncms client");
 
-  cons.current(1, 60.6);  
-  gen.current(2, 60.6);  
-  
-  
+  cons.current(1, 60.6);
+  gen.current(2, 60.6);
+
+
   // Do a first update immediately
   updateData();
   sendDataRemoto();
-    sendDataLocal();
+  sendDataLocal();
   lastRequest = millis();
 }
 
@@ -66,8 +66,8 @@ void loop() {
 
 void updateData() {
   // convert the readings to a String to send it:
-  double consumo = 240.0*cons.calcIrms(1480)-54;
-  double generacion = 240.0*gen.calcIrms(1480)-54;
+  double consumo = 240.0 * cons.calcIrms(1480) - 54;
+  double generacion = 240.0 * gen.calcIrms(1480) - 54;
   double contador = consumo - generacion;
   dataString = "Consumo_w:";
   dataString += consumo;
@@ -99,7 +99,7 @@ void sendDataRemoto() {
   // released. Declaring it global works too, BTW.
   Process emoncms;
   Console.print("\n\nSending data CURL... ");
-  Console.println(url);  
+  Console.println(url);
   emoncms.begin("curl");
   emoncms.addParameter("-g");
   emoncms.addParameter(url);
@@ -109,7 +109,7 @@ void sendDataRemoto() {
 
   // If there's incoming data from the net connection,
   // send it out the Console:
-  while (emoncms.available()>0) {
+  while (emoncms.available() > 0) {
     char c = emoncms.read();
     Console.write(c);
   }
@@ -123,6 +123,7 @@ void sendDataLocal() {
 
   // form the string for the URL parameter:
   String url = "http://rpihugo.ddns.net/emoncms/input/post?";
+  url += "node=Yun_Entrada&";
   url += "json={";
   url += dataString;
   url += "}&";
@@ -135,7 +136,7 @@ void sendDataLocal() {
   // released. Declaring it global works too, BTW.
   Process emoncms;
   Console.print("\n\nSending data local CURL... ");
-  Console.println(url);  
+  Console.println(url);
   emoncms.begin("curl");
   emoncms.addParameter("-g");
   emoncms.addParameter(url);
@@ -145,7 +146,7 @@ void sendDataLocal() {
 
   // If there's incoming data from the net connection,
   // send it out the Console:
-  while (emoncms.available()>0) {
+  while (emoncms.available() > 0) {
     char c = emoncms.read();
     Console.write(c);
   }

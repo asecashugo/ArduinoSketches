@@ -97,7 +97,7 @@ void setup()
 {
 
   Bridge.begin();
-  
+
   Serial.begin(9600);
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW);
@@ -161,7 +161,7 @@ void loop() {
     sendDataLocal();
     lastRequest = now;
 
-}
+  }
 }
 
 
@@ -181,6 +181,7 @@ void sendDataLocal() {
 
   // form the string for the URL parameter:
   String url = "http://rpihugo.ddns.net/emoncms/input/post?";
+  url += "node=Yun_Caldera&";
   url += "json={";
   url += dataString;
   url += "}&";

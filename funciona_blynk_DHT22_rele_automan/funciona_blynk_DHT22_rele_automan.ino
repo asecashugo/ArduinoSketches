@@ -15,8 +15,8 @@
 WidgetLED led1(V5);
 
 bool salida;
-int salida_man, salida_auto, auto_mode;
-double consigna, hist;
+int ver, salida_man, salida_auto, auto_mode;
+double consigna, hist, delta;
 float t, h;
 
 
@@ -38,6 +38,13 @@ Serial.println(salida_man);
 Serial.println(salida_auto);
                   Serial.write("auto_mode = ");
   Serial.println(auto_mode);
+
+  Blynk.virtualWrite(3, hist); // virtual pin
+  Blynk.virtualWrite(4, ver); // virtual pin
+  
+
+  Blynk.virtualWrite(5, consigna); // virtual pin
+  Blynk.virtualWrite(7, delta); // virtual pin
 
   Blynk.virtualWrite(8, t); // virtual pin
   Blynk.virtualWrite(9, h); // virtual pin
@@ -64,14 +71,8 @@ BLYNK_WRITE(V1)
 BLYNK_WRITE(V2)
 {
   int auxV2 = param.asDouble(); // assigning incoming value from pin V1 to a variable
-  consigna = auxV2;
+  consigna = auxV2/10.0; //para dar un decimal...
 }
-
-//BLYNK_WRITE(V3)
-//{
-//  int auxV3 = param.asDouble(); // assigning incoming value from pin V1 to a variable
-//  hist = auxV3;
-//}
 
 
 
@@ -85,8 +86,11 @@ void setup()
   Blynk.begin(auth);
   dht.begin(); 
   timer.setInterval(1000, sendUptime);//1000=1s
-  hist=2;
+  hist=1;
   salida_man=0;
+
+//  Version
+  ver = 103;
 
 }
 
@@ -95,7 +99,9 @@ void loop() {
   Blynk.run();
   timer.run();
 
-if ((salida_auto == 0) && (t < consigna - 2))
+  delta = consigna - t;
+
+if ((salida_auto == 0) && (t < consigna - hist))
 {
   salida_auto = 1;
 }
