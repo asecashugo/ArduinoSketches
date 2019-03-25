@@ -3,11 +3,23 @@
 #include <BlynkSimpleMKR1000.h>
 #include <SimpleTimer.h>
 
+//DS18B20 Temp suelo//
+#include <OneWire.h> 
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 2 
+OneWire oneWire(ONE_WIRE_BUS); 
+DallasTemperature sensors(&oneWire);
+
+//////////////////////
+
+
 ///////////////////////////////////////Sensor temp hum aire DHT22//////////////
 #include <DHT.h>
 #define DHTPIN 5 //pin gpio 12 in sensor
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
+DeviceAddress sensor1 = { 0x28, 0xFF, 0xCD, 0x22, 0x50, 0x17, 0x4, 0x69 };
+DeviceAddress sensor2 = { 0x28, 0xFF, 0xE7, 0xB5, 0x50, 0x17, 0x4, 0x4B };
 ///////////////////////////////////////////////////////////////////////////////
 
 char auth[] = "91ae68f34846462d813ba7c208d46aa2";
@@ -43,7 +55,8 @@ BLYNK_WRITE(V6){  int auxV6 = param.asDouble();
 int luminosidad;
 float temp_aire = 30;
 float hum_aire = 50;
-float temp_tierra = 25;
+float temp_tierra_1 = 25;
+float temp_tierra_2 = 25;
 float hum_tierra_1 = 33;
 float hum_tierra_2 = 44;
 float hum_tierra_3 = 55;
@@ -63,11 +76,22 @@ bool bomba =0;
 void sendUptime()
 {
   //Lectura entradas
+
+//DHT22 Temp hum aire
 hum_aire = dht.readHumidity();
   temp_aire = dht.readTemperature();
   temp_aire = ((int) (temp_aire * 10) / 10.0);
   hum_aire = ((int) (hum_aire * 10) / 10.0);
 
+//Higrometros
+  hum_tierra_1 = 1073-analogRead(A1);
+  hum_tierra_2 = 1073-analogRead(A2);
+  hum_tierra_3 = 1073-analogRead(A3);
+
+//DS18B20 Temp suelo
+  sensors.requestTemperatures();
+  temp_tierra_1 = sensors.getTempC(sensor1);
+  temp_tierra_2 = sensors.getTempC(sensor2);
 }
 
 //////SETUP//////////
@@ -96,8 +120,10 @@ void setup()
 //  while (Blynk.connect() == false) {}
   digitalWrite(6, HIGH);
   Serial.println("Connected...");
-  //DHT
+  //DHT22
   dht.begin();
+  //DS18B20
+  sensors.begin(); 
   //TIMER
   timer.setInterval(1000, sendUptime);//1000=1s
   
@@ -143,7 +169,11 @@ if (manual_selector == 1)
   digitalWrite(4, bomba==1);
 
 //Salidas virtuales Blynk
-Blynk.virtualWrite(7, temp_tierra); // virtual pin
+Blynk.virtualWrite(1, manual_selector); // virtual pin
+
+
+Blynk.virtualWrite(7, temp_tierra_1); // virtual pin
+Blynk.virtualWrite(17, temp_tierra_2); // virtual pin
 Blynk.virtualWrite(8, temp_aire); // virtual pin
 Blynk.virtualWrite(9, hum_aire); // virtual pin
 
