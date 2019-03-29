@@ -9,7 +9,8 @@
 #define ONE_WIRE_BUS 2 
 OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
-
+DeviceAddress sensor1 = { 0x28, 0xFF, 0xCD, 0x22, 0x50, 0x17, 0x4, 0x69 };
+DeviceAddress sensor2 = { 0x28, 0xFF, 0xE7, 0xB5, 0x50, 0x17, 0x4, 0x4B };
 //////////////////////
 
 
@@ -18,8 +19,7 @@ DallasTemperature sensors(&oneWire);
 #define DHTPIN 5 //pin gpio 12 in sensor
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
-DeviceAddress sensor1 = { 0x28, 0xFF, 0xCD, 0x22, 0x50, 0x17, 0x4, 0x69 };
-DeviceAddress sensor2 = { 0x28, 0xFF, 0xE7, 0xB5, 0x50, 0x17, 0x4, 0x4B };
+
 ///////////////////////////////////////////////////////////////////////////////
 
 char auth[] = "91ae68f34846462d813ba7c208d46aa2";
@@ -85,8 +85,8 @@ hum_aire = dht.readHumidity();
 
 //Higrometros
   hum_tierra_1 = 1073-analogRead(A1);
-  hum_tierra_2 = 1073-analogRead(A2);
-  hum_tierra_3 = 1073-analogRead(A3);
+  hum_tierra_2 = 1073-analogRead(A3);
+  hum_tierra_3 = 1073-analogRead(A5);
 
 //DS18B20 Temp suelo
   sensors.requestTemperatures();
@@ -145,6 +145,7 @@ hum_insuf_3 = (hum_tierra_3 < cons_hum_3);
 
 //evaluacion luminosidad
 lum_exces = luminosidad > cons_lum;
+
 
 //decision hum
 hum_insuf = hum_insuf_1 || hum_insuf_2 || hum_insuf_3;
