@@ -167,7 +167,7 @@ if (manual_selector == 1)
     }
 
 //Escritura salidas
-  digitalWrite(4, bomba==1);
+  digitalWrite(8, bomba==1);
 
 //Salidas virtuales Blynk
 Blynk.virtualWrite(1, manual_selector); // virtual pin
